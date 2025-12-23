@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aces of Valor - Ultimate Tracker</title>
+    <style>
+        body { font-family: sans-serif; background-color: #1a252f; color: white; padding: 15px; margin: 0; }
+        .container { max-width: 500px; margin: auto; }
+        .phase { display: none; background: #2c3e50; padding: 20px; border-radius: 10px; border: 2px solid #f1c40f; }
+        .active { display: block; }
+        h1 { color: #f1c40f; text-align: center; font-size: 1.1rem; text-transform: uppercase; }
+        h2 { border-bottom: 1px solid #f1c40f; padding-bottom: 5px; color: #f1c40f; font-size: 1rem; }
+        button { background: #e67e22; color: white; border: none; padding: 15px; border-radius: 5px; cursor: pointer; font-weight: bold; margin-top: 10px; width: 100%; font-size: 1rem; }
+        .btn-next { background: #27ae60; margin-top: 20px; border: 2px solid white; }
+        select, input { width: 100%; padding: 12px; margin: 10px 0; box-sizing: border-box; border-radius: 5px; border: none; font-size: 1rem; }
+        .result-box { background: #16a085; padding: 12px; margin-top: 10px; border-radius: 5px; font-size: 0.9rem; line-height: 1.4; border-left: 5px solid #f1c40f; }
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; background: #34495e; }
+        th, td { border: 1px solid #f1c40f; padding: 8px; text-align: center; font-size: 0.8rem; }
+        .step-indicator { text-align: center; font-size: 0.7rem; color: #bdc3c7; margin-bottom: 10px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Aces of Valor Tracker</h1>
+
+    <div id="phase1" class="phase active">
+        <div class="step-indicator">FASE 1 DI 5</div>
+        <h2>I) Lunghezza Campagna</h2>
+        <select id="campLength">
+            <option value="8">Corta (8 Missioni) - 21+ VP</option>
+            <option value="12">Media (12 Missioni) - 29+ VP</option>
+            <option value="16">Lunga (16 Missioni) - 36+ VP</option>
+        </select>
+        <button class="btn-next" onclick="cambiaFase(2)">AVANTI: CONFIGURA SQUADRA &raquo;</button>
+    </div>
+
+    <div id="phase2" class="phase">
+        <div class="step-indicator">FASE 2 DI 5</div>
+        <h2>III) Nazione e Tier</h2>
+        <select id="nat">
+            <option value="GER">Germania (GER)</option>
+            <option value="UK">Regno Unito (UK)</option>
+            <option value="FR">Francia (FR)</option>
+            <option value="US">USA (US)</option>
+        </select>
+        <button onclick="calcolaTier()">TIRA DADO TIER</button>
+        <div id="tierRes" class="result-box" style="display:none;"></div>
+        <button class="btn-next" onclick="cambiaFase(3)">AVANTI: GENERA PILOTI &raquo;</button>
+    </div>
+
+    <div id="phase3" class="phase">
+        <div class="step-indicator">FASE 3 DI 5</div>
+        <h2>IV) Piloti Ready Box</h2>
+        <button onclick="calcolaPiloti()">GENERA 8 PILOTI</button>
+        <div id="pilotRes" class="result-box" style="display:none;"></div>
+        <button class="btn-next" onclick="cambiaFase(4)">AVANTI: AEROPORTO &raquo;</button>
+    </div>
+
+    <div id="phase4" class="phase">
+        <div class="step-indicator">FASE 4 DI 5</div>
+        <h2>V) Home Airfield</h2>
+        <button onclick="calcolaAeroporto()">TIRA DADO AEROPORTO</button>
+        <div id="airfieldRes" class="result-box" style="display:none;"></div>
+        <button class="btn-next" onclick="cambiaFase(5)">VAI AL REGISTRO MISSIONI &raquo;</button>
+    </div>
+
+    <div id="phase5" class="phase">
+        <div class="step-indicator">FASE 5 DI 5</div>
+        <h2>Log Missioni</h2>
+        <input type="text" id="mType" placeholder="Tipo Missione (es. Patrol)">
+        <input type="number" id="mPoints" placeholder="MP Guadagnati">
+        <button style="background:#27ae60" onclick="aggiungiMissione()">REGISTRA MISSIONE</button>
+
+        <table id="missionLog">
+            <thead><tr><th>M.</th><th>Tipo</th><th>MP</th><th>VP</th></tr></thead>
+            <tbody></tbody>
+        </table>
+        
+        <div class="result-box" id="totalStatus"><b>VP Totali: 0</b></div>
+        <button onclick="location.reload()" style="background:#c0392b; font-size:0.7rem;">RESETTA TUTTO</button>
+    </div>
+</div>
+
+<script>
+    // FUNZIONE UNICA DI CAMBIO FASE - Più robusta
+    function cambiaFase(num) {
+        // Nascondi tutto
+        const fasi = document.getElementsByClassName('phase');
+        for (let i = 0; i < fasi.length; i++) {
+            fasi[i].style.display = 'none';
+        }
+        // Mostra quella richiesta
+        document.getElementById('phase' + num).style.display = 'block';
+        window.scrollTo(0,0);
+    }
+
+    function calcolaTier() {
+        const n = document.getElementById('nat').value;
+        const d = Math.floor(Math.random() * 6) + 1;
+        const t = d <= 2 ? 1 : (d <= 4 ? 2 : 3);
+        const planes = {
+            'GER': ['Albatros D.III', 'Fokker Dr.1', 'Fokker D.VII'],
+            'UK': ['Sopwith Pup', 'Sopwith Camel', 'Sopwith Dolphin'],
+            'FR': ['Nieuport 17', 'SPAD VII', 'SPAD XIII'],
+            'US': ['Nieuport 17', 'Nieuport 28', 'SPAD XIII']
+        };
+        const res = document.getElementById('tierRes');
+        res.style.display = 'block';
+        res.innerHTML = "Dado: " + d + "<br>Aereo: <b>" + planes[n][t-1] + "</b> (Tier " + t + ")";
+    }
+
+    function calcolaPiloti() {
+        const skills = ["0-0", "1-0", "0-1", "1-1", "2-1", "1-2", "2-2"];
+        let out = "";
+        for(let i=1; i<=8; i++) {
+            out += "P" + i + ": <b>" + skills[Math.floor(Math.random() * skills.length)] + "</b> | ";
+            if(i==4) out += "<br>";
+        }
+        const res = document.getElementById('pilotRes');
+        res.style.display = 'block';
+        res.innerHTML = out;
+    }
+
+    function calcolaAeroporto() {
+        const d = Math.floor(Math.random() * 6) + 1;
+        const pos = d <= 2 ? "A" : (d <= 4 ? "B" : "C");
+        const res = document.getElementById('airfieldRes');
+        res.style.display = 'block';
+        res.innerHTML = "Dado: " + d + "<br>Posizione: <b>" + pos + "</b>";
+    }
+
+    let vpTot = 0;
+    let mCount = 1;
+    function aggiungiMissione() {
+        const tipo = document.getElementById('mType').value || "N/A";
+        const mp = parseInt(document.getElementById('mPoints').value) || 0;
+        const vp = Math.floor(mp / 5);
+        vpTot += vp;
+
+        const tbody = document.getElementById('missionLog').getElementsByTagName('tbody')[0];
+        const row = tbody.insertRow();
+        row.innerHTML = "<td>"+mCount+"</td><td>"+tipo+"</td><td>"+mp+"</td><td>"+vp+"</td>";
+        
+        document.getElementById('totalStatus').innerHTML = "<b>VP Totali: " + vpTot + "</b>";
+        mCount++;
+        document.getElementById('mType').value = "";
+        document.getElementById('mPoints').value = "";
+    }
+</script>
+</body>
+</html>
