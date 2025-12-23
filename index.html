@@ -3,96 +3,142 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aces of Valor - Ultimate Tracker</title>
+    <title>Aces of Valor - Dashboard</title>
     <style>
-        body { font-family: sans-serif; background-color: #1a252f; color: white; padding: 15px; margin: 0; }
-        .container { max-width: 500px; margin: auto; }
-        .phase { display: none; background: #2c3e50; padding: 20px; border-radius: 10px; border: 2px solid #f1c40f; }
-        .active { display: block; }
-        h1 { color: #f1c40f; text-align: center; font-size: 1.1rem; text-transform: uppercase; }
-        h2 { border-bottom: 1px solid #f1c40f; padding-bottom: 5px; color: #f1c40f; font-size: 1rem; }
-        button { background: #e67e22; color: white; border: none; padding: 15px; border-radius: 5px; cursor: pointer; font-weight: bold; margin-top: 10px; width: 100%; font-size: 1rem; }
-        .btn-next { background: #27ae60; margin-top: 20px; border: 2px solid white; }
-        select, input { width: 100%; padding: 12px; margin: 10px 0; box-sizing: border-box; border-radius: 5px; border: none; font-size: 1rem; }
-        .result-box { background: #16a085; padding: 12px; margin-top: 10px; border-radius: 5px; font-size: 0.9rem; line-height: 1.4; border-left: 5px solid #f1c40f; }
-        table { width: 100%; border-collapse: collapse; margin-top: 15px; background: #34495e; }
-        th, td { border: 1px solid #f1c40f; padding: 8px; text-align: center; font-size: 0.8rem; }
-        .step-indicator { text-align: center; font-size: 0.7rem; color: #bdc3c7; margin-bottom: 10px; }
+        :root {
+            --gold: #d4af37;
+            --dark-blue: #1c2833;
+            --paper: #f4ecd8;
+            --accent: #e67e22;
+        }
+        body { 
+            font-family: 'Courier New', Courier, monospace; 
+            background-color: var(--dark-blue); 
+            color: #ecf0f1; 
+            margin: 0; padding: 15px;
+        }
+        .container { max-width: 600px; margin: auto; }
+        
+        /* Stile Vintage Card */
+        .phase { 
+            display: none; 
+            background: rgba(44, 62, 80, 0.9); 
+            padding: 20px; 
+            border-radius: 5px; 
+            border: 2px solid var(--gold);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+        }
+        .active { display: block; animation: fadeIn 0.5s; }
+        
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        h1 { color: var(--gold); text-align: center; border-bottom: 2px double var(--gold); padding-bottom: 10px; }
+        h2 { font-size: 1.2rem; color: var(--gold); text-transform: uppercase; margin-top: 0; }
+
+        /* Input e Button */
+        select, input { 
+            width: 100%; padding: 12px; margin: 10px 0; 
+            background: var(--paper); color: #333; 
+            border: none; border-radius: 3px; font-weight: bold;
+        }
+        button { 
+            background: var(--accent); color: white; border: none; 
+            padding: 15px; border-radius: 3px; cursor: pointer; 
+            font-weight: bold; width: 100%; text-transform: uppercase;
+            box-shadow: 0 3px 0 #a04000; transition: 0.2s;
+        }
+        button:active { transform: translateY(3px); box-shadow: none; }
+        
+        .btn-nav { background: #27ae60; box-shadow: 0 3px 0 #196f3d; margin-top: 20px; }
+
+        /* Risultati */
+        .result-box { 
+            background: rgba(244, 236, 216, 0.1); 
+            padding: 15px; margin-top: 15px; 
+            border-left: 5px solid var(--gold); font-size: 1rem;
+        }
+        
+        .pilot-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+        .pilot-card { background: rgba(0,0,0,0.2); padding: 5px 10px; border: 1px solid #555; }
+
+        table { width: 100%; margin-top: 15px; border-collapse: collapse; background: #f4ecd8; color: #333; }
+        th, td { border: 1px solid #333; padding: 8px; text-align: center; }
+        th { background: #d5dbdb; }
+
+        .status-bar { text-align: center; margin-bottom: 10px; color: var(--gold); font-weight: bold; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h1>Aces of Valor Tracker</h1>
+    <h1>🛩️ ACES OF VALOR</h1>
 
     <div id="phase1" class="phase active">
-        <div class="step-indicator">FASE 1 DI 5</div>
-        <h2>I) Lunghezza Campagna</h2>
+        <div class="status-bar">LOGBOOK - FASE 1</div>
+        <h2>Configura Campagna</h2>
+        <label>Durata Operazione:</label>
         <select id="campLength">
-            <option value="8">Corta (8 Missioni) - 21+ VP</option>
-            <option value="12">Media (12 Missioni) - 29+ VP</option>
-            <option value="16">Lunga (16 Missioni) - 36+ VP</option>
+            <option value="8">CORTA (8 Missioni) - Obiettivo 21 VP</option>
+            <option value="12">MEDIA (12 Missioni) - Obiettivo 29 VP</option>
+            <option value="16">LUNGA (16 Missioni) - Obiettivo 36 VP</option>
         </select>
-        <button class="btn-next" onclick="cambiaFase(2)">AVANTI: CONFIGURA SQUADRA &raquo;</button>
+        <button class="btn-nav" onclick="cambiaFase(2)">Pianifica Squadriglia ➔</button>
     </div>
 
     <div id="phase2" class="phase">
-        <div class="step-indicator">FASE 2 DI 5</div>
-        <h2>III) Nazione e Tier</h2>
+        <div class="status-bar">LOGBOOK - FASE 2</div>
+        <h2>Assegnazione Velivoli</h2>
         <select id="nat">
-            <option value="GER">Germania (GER)</option>
-            <option value="UK">Regno Unito (UK)</option>
-            <option value="FR">Francia (FR)</option>
-            <option value="US">USA (US)</option>
+            <option value="GER">🇩🇪 GERMANIA</option>
+            <option value="UK">🇬🇧 REGNO UNITO</option>
+            <option value="FR">🇫🇷 FRANCIA</option>
+            <option value="US">🇺🇸 U.S.A.</option>
         </select>
-        <button onclick="calcolaTier()">TIRA DADO TIER</button>
+        <button onclick="calcolaTier()">🎲 Tira Dado Tier</button>
         <div id="tierRes" class="result-box" style="display:none;"></div>
-        <button class="btn-next" onclick="cambiaFase(3)">AVANTI: GENERA PILOTI &raquo;</button>
+        <button class="btn-nav" onclick="cambiaFase(3)">Recluta Piloti ➔</button>
     </div>
 
     <div id="phase3" class="phase">
-        <div class="step-indicator">FASE 3 DI 5</div>
-        <h2>IV) Piloti Ready Box</h2>
-        <button onclick="calcolaPiloti()">GENERA 8 PILOTI</button>
-        <div id="pilotRes" class="result-box" style="display:none;"></div>
-        <button class="btn-next" onclick="cambiaFase(4)">AVANTI: AEROPORTO &raquo;</button>
+        <div class="status-bar">LOGBOOK - FASE 3</div>
+        <h2>Stato Piloti (Ready Box)</h2>
+        <button onclick="calcolaPiloti()">📋 Genera Squadriglia</button>
+        <div id="pilotRes" class="pilot-grid" style="display:none;"></div>
+        <button class="btn-nav" onclick="cambiaFase(4)">Localizza Base ➔</button>
     </div>
 
     <div id="phase4" class="phase">
-        <div class="step-indicator">FASE 4 DI 5</div>
-        <h2>V) Home Airfield</h2>
-        <button onclick="calcolaAeroporto()">TIRA DADO AEROPORTO</button>
-        <div id="airfieldRes" class="result-box" style="display:none;"></div>
-        <button class="btn-next" onclick="cambiaFase(5)">VAI AL REGISTRO MISSIONI &raquo;</button>
+        <div class="status-bar">LOGBOOK - FASE 4</div>
+        <h2>Coordinate Aeroporto</h2>
+        <button onclick="calcolaAeroporto()">📍 Rileva Posizione</button>
+        <div id="airfieldRes" class="result-box" style="display:none; text-align:center; font-size:1.5rem;"></div>
+        <button class="btn-nav" onclick="cambiaFase(5)">Inizia Missioni ➔</button>
     </div>
 
     <div id="phase5" class="phase">
-        <div class="step-indicator">FASE 5 DI 5</div>
-        <h2>Log Missioni</h2>
+        <div class="status-bar">TABELLONE DI GUERRA</div>
+        <h2>Registro Voli</h2>
         <input type="text" id="mType" placeholder="Tipo Missione (es. Patrol)">
-        <input type="number" id="mPoints" placeholder="MP Guadagnati">
-        <button style="background:#27ae60" onclick="aggiungiMissione()">REGISTRA MISSIONE</button>
+        <input type="number" id="mPoints" placeholder="Punti Missione (MP)">
+        <button style="background:#27ae60" onclick="aggiungiMissione()">Registra Risultato</button>
 
         <table id="missionLog">
             <thead><tr><th>M.</th><th>Tipo</th><th>MP</th><th>VP</th></tr></thead>
             <tbody></tbody>
         </table>
         
-        <div class="result-box" id="totalStatus"><b>VP Totali: 0</b></div>
-        <button onclick="location.reload()" style="background:#c0392b; font-size:0.7rem;">RESETTA TUTTO</button>
+        <div class="result-box" id="totalStatus" style="text-align:center;">
+            <b>VP TOTALI: 0</b>
+        </div>
+        <button onclick="location.reload()" style="background:#c0392b; font-size:0.8rem; margin-top:40px;">⚠️ Resetta Campagna</button>
     </div>
 </div>
 
 <script>
-    // FUNZIONE UNICA DI CAMBIO FASE - Più robusta
     function cambiaFase(num) {
-        // Nascondi tutto
         const fasi = document.getElementsByClassName('phase');
-        for (let i = 0; i < fasi.length; i++) {
-            fasi[i].style.display = 'none';
-        }
-        // Mostra quella richiesta
-        document.getElementById('phase' + num).style.display = 'block';
+        for (let i = 0; i < fasi.length; i++) fasi[i].style.display = 'none';
+        document.getElementById('phase' + num).classList.add('active');
         window.scrollTo(0,0);
     }
 
@@ -101,53 +147,3 @@
         const d = Math.floor(Math.random() * 6) + 1;
         const t = d <= 2 ? 1 : (d <= 4 ? 2 : 3);
         const planes = {
-            'GER': ['Albatros D.III', 'Fokker Dr.1', 'Fokker D.VII'],
-            'UK': ['Sopwith Pup', 'Sopwith Camel', 'Sopwith Dolphin'],
-            'FR': ['Nieuport 17', 'SPAD VII', 'SPAD XIII'],
-            'US': ['Nieuport 17', 'Nieuport 28', 'SPAD XIII']
-        };
-        const res = document.getElementById('tierRes');
-        res.style.display = 'block';
-        res.innerHTML = "Dado: " + d + "<br>Aereo: <b>" + planes[n][t-1] + "</b> (Tier " + t + ")";
-    }
-
-    function calcolaPiloti() {
-        const skills = ["0-0", "1-0", "0-1", "1-1", "2-1", "1-2", "2-2"];
-        let out = "";
-        for(let i=1; i<=8; i++) {
-            out += "P" + i + ": <b>" + skills[Math.floor(Math.random() * skills.length)] + "</b> | ";
-            if(i==4) out += "<br>";
-        }
-        const res = document.getElementById('pilotRes');
-        res.style.display = 'block';
-        res.innerHTML = out;
-    }
-
-    function calcolaAeroporto() {
-        const d = Math.floor(Math.random() * 6) + 1;
-        const pos = d <= 2 ? "A" : (d <= 4 ? "B" : "C");
-        const res = document.getElementById('airfieldRes');
-        res.style.display = 'block';
-        res.innerHTML = "Dado: " + d + "<br>Posizione: <b>" + pos + "</b>";
-    }
-
-    let vpTot = 0;
-    let mCount = 1;
-    function aggiungiMissione() {
-        const tipo = document.getElementById('mType').value || "N/A";
-        const mp = parseInt(document.getElementById('mPoints').value) || 0;
-        const vp = Math.floor(mp / 5);
-        vpTot += vp;
-
-        const tbody = document.getElementById('missionLog').getElementsByTagName('tbody')[0];
-        const row = tbody.insertRow();
-        row.innerHTML = "<td>"+mCount+"</td><td>"+tipo+"</td><td>"+mp+"</td><td>"+vp+"</td>";
-        
-        document.getElementById('totalStatus').innerHTML = "<b>VP Totali: " + vpTot + "</b>";
-        mCount++;
-        document.getElementById('mType').value = "";
-        document.getElementById('mPoints').value = "";
-    }
-</script>
-</body>
-</html>
