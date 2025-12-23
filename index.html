@@ -3,188 +3,245 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aces of Valor - Campaign Command</title>
+    <title>Aces of Valor - Tactical Console</title>
     <style>
-        :root { --paper: #f0e6d2; --ink: #3b2f21; --military: #556b2f; --accent: #8b0000; }
-        body { background: #1a1a1a; color: var(--ink); font-family: 'Courier New', Courier, monospace; padding: 10px; }
-        .map-bg { max-width: 800px; margin: auto; background: var(--paper); border: 10px double var(--ink); padding: 20px; border-radius: 2px; position: relative; }
+        :root { --paper: #f0e6d2; --ink: #3b2f21; --army: #4b5320; --danger: #8b0000; --gold: #d4af37; --air: #268bd2; }
+        body { background: #1a1a1a; color: var(--ink); font-family: 'Courier New', Courier, monospace; margin: 0; padding: 10px; }
+        .container { max-width: 900px; margin: auto; background: var(--paper); border: 8px double var(--ink); padding: 20px; min-height: 95vh; box-shadow: 0 0 20px black; }
         
-        h1, h2 { text-align: center; text-transform: uppercase; letter-spacing: 2px; border-bottom: 2px solid var(--ink); }
-        .tab-nav { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; margin-bottom: 20px; }
-        .tab-btn { background: var(--military); color: white; border: none; padding: 10px; cursor: pointer; font-size: 0.8em; text-transform: uppercase; }
-        .tab-btn.active { background: var(--ink); }
+        h1, h2, h3 { text-align: center; text-transform: uppercase; border-bottom: 2px solid var(--ink); margin: 10px 0; }
+        
+        .tabs { display: flex; gap: 2px; margin-bottom: 15px; background: var(--ink); padding: 2px; }
+        .tab { flex: 1; background: var(--army); color: white; border: none; padding: 12px; cursor: pointer; font-weight: bold; text-transform: uppercase; font-size: 0.8em; }
+        .tab.active { background: var(--paper); color: var(--ink); }
 
-        .section { display: none; }
-        .active { display: block; }
+        .panel { display: none; }
+        .panel.active { display: block; }
 
-        .card { border: 1px solid var(--ink); padding: 10px; margin-bottom: 10px; background: rgba(255,255,255,0.3); }
-        .stat-line { display: flex; justify-content: space-between; align-items: center; margin: 5px 0; }
-        input, select { background: transparent; border: 1px solid var(--ink); padding: 5px; font-family: inherit; }
+        /* Roster Grid */
+        .pilot-grid { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        .pilot-grid th, .pilot-grid td { border: 1px solid var(--ink); padding: 8px; text-align: center; }
+        .ace { color: var(--danger); font-weight: bold; }
+
+        /* Combat Layout */
+        .combat-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .card { border: 1px solid var(--ink); padding: 10px; background: rgba(0,0,0,0.05); margin-bottom: 10px; }
         
-        .dice-btn { background: var(--accent); color: white; border: none; padding: 10px; width: 100%; cursor: pointer; font-weight: bold; margin-top: 5px; }
-        .result-box { background: #fff; border-left: 5px solid var(--accent); padding: 8px; margin-top: 5px; font-weight: bold; min-height: 20px; }
+        .btn { width: 100%; padding: 10px; cursor: pointer; border: none; font-weight: bold; color: white; margin-top: 5px; }
+        .btn-roll { background: var(--danger); }
+        .btn-setup { background: var(--army); }
         
-        .fleet-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; text-align: center; }
-        .counter { font-size: 1.5em; font-weight: bold; }
+        select, input { width: 100%; padding: 8px; box-sizing: border-box; border: 1px solid var(--ink); font-family: inherit; }
+        .res-box { background: white; padding: 10px; border: 1px dashed var(--ink); margin-top: 10px; min-height: 50px; font-size: 0.9em; }
+        .log { font-size: 0.75em; height: 120px; overflow-y: auto; background: #eee; padding: 5px; border: 1px solid #ccc; margin-top: 10px; }
     </style>
 </head>
 <body>
 
-<div class="map-bg">
-    <h1>Aces of Valor - HQ</h1>
-    
-    <div class="tab-nav">
-        <button class="tab-btn active" onclick="show('setup')">Setup Squadriglia</button>
-        <button class="tab-btn" onclick="show('mission')">Missione</button>
-        <button class="tab-btn" onclick="show('fleet')">Logistica</button>
+<div class="container">
+    <h1>Aces of Valor - Tactical Console</h1>
+
+    <div class="tabs">
+        <button class="tab active" onclick="openTab('setup')">Setup</button>
+        <button class="tab" onclick="openTab('roster')">Squadriglia</button>
+        <button class="tab" onclick="openTab('combat')">Combattimento</button>
     </div>
 
-    <div id="setup" class="section active">
+    <div id="setup" class="panel active">
         <div class="card">
-            <h2>I) Campagna & Nazionalità</h2>
-            <div class="stat-line">
-                <label>Lunghezza:</label>
-                <select id="camp-len">
-                    <option value="8">Corta (8 Missioni)</option>
-                    <option value="12">Media (12 Missioni)</option>
-                    <option value="16">Lunga (16 Missioni)</option>
+            <h3>Preparazione Campagna</h3>
+            <label>Nazione:</label>
+            <select id="nation">
+                <option value="GER">Germania</option>
+                <option value="UK">Gran Bretagna</option>
+                <option value="FR">Francia</option>
+                <option value="US">USA</option>
+            </select>
+            <button class="btn btn-setup" onclick="rollS1()">Roll S1: Assegna Aerei</button>
+            <button class="btn btn-setup" onclick="rollS2()">Roll S2: Aeroporto Base</button>
+            <div id="setup-res" class="res-box">Configura la tua squadriglia...</div>
+        </div>
+        <div class="card">
+            <h3>Meteo (M1)</h3>
+            <button class="btn btn-setup" style="background:#555" onclick="rollMeteo()">Tira Meteo del Giorno</button>
+            <div id="meteo-res" class="res-box">-</div>
+        </div>
+    </div>
+
+    <div id="roster" class="panel">
+        <h3>Roster Piloti</h3>
+        <button class="btn btn-setup" onclick="generateSquadron()">Genera 8 Piloti Iniziali</button>
+        <table class="pilot-grid">
+            <thead>
+                <tr>
+                    <th>Nome</th>
+                    <th>Air</th>
+                    <th>Gnd</th>
+                    <th>Kill</th>
+                    <th>Azione</th>
+                </tr>
+            </thead>
+            <tbody id="pilot-list"></tbody>
+        </table>
+    </div>
+
+    <div id="combat" class="panel">
+        <div class="combat-cols">
+            <div class="card">
+                <h3 style="color:var(--air)">Aria-Aria (C7/C8)</h3>
+                <label>Pilota:</label>
+                <select id="sel-air-pilot"></select>
+                <label>Diff. Iniziativa (Att-Dif):</label>
+                <input type="number" id="air-in" value="2">
+                <label>Bersaglio:</label>
+                <select id="air-target">
+                    <option value="5">Caccia (Struct 5)</option>
+                    <option value="6">2-Seater (Struct 6)</option>
+                    <option value="7">Bombardiere (Struct 7)</option>
                 </select>
+                <button class="btn btn-roll" onclick="solveAir()">FUOCO!</button>
             </div>
-            <div class="stat-line">
-                <label>Nazione:</label>
-                <select id="nation">
-                    <option value="GER">Germania (Luftstreitkräfte)</option>
-                    <option value="UK">Gran Bretagna (RFC/RAF)</option>
-                    <option value="FR">Francia (Aéronautique Militaire)</option>
-                    <option value="US">USA (Air Service)</option>
+            <div class="card">
+                <h3 style="color:var(--army)">Aria-Terra (C11)</h3>
+                <label>Pilota:</label>
+                <select id="sel-gnd-pilot"></select>
+                <label>IN Difference:</label>
+                <input type="number" id="gnd-in" value="6">
+                <label>Obiettivo:</label>
+                <select id="gnd-target">
+                    <option value="4">Fanteria (4+)</option>
+                    <option value="5">Trincea/Art (5+)</option>
                 </select>
+                <button class="btn btn-roll" style="background:var(--army)" onclick="solveGround()">STRAFING!</button>
             </div>
-            <button class="dice-btn" onclick="rollSquadronAssignment()">Roll S1: Assegnazione Squadriglia (D6)</button>
-            <div id="res-s1" class="result-box">Aerei iniziali: -</div>
         </div>
-
-        <div class="card">
-            <h2>II) Aeroporto Base (S2)</h2>
-            <button class="dice-btn" onclick="rollHomeField()">Roll S2: Posizione Aeroporto (D6)</button>
-            <div id="res-s2" class="result-box">Aeroporto di Casa: -</div>
-        </div>
+        <div id="combat-res" class="res-box">Risultato scontro...</div>
+        <div id="combat-log" class="log"></div>
     </div>
-
-    <div id="mission" class="section">
-        <div class="card">
-            <h2>Meteo & Turno</h2>
-            <button class="dice-btn" onclick="rollWeather()">Tira Meteo (D6)</button>
-            <div id="res-weather" class="result-box">-</div>
-        </div>
-        <div class="card">
-            <h2>Evento Incontro (M2/M3)</h2>
-            <button class="dice-btn" onclick="rollEncounter()">Genera Incontro</button>
-            <div id="res-enc" class="result-box">-</div>
-        </div>
-    </div>
-
-    <div id="fleet" class="section">
-        <div class="card">
-            <h2>Stato Squadriglia</h2>
-            <p>Aerei totali iniziali: 8 Fighters</p>
-            <div class="fleet-grid">
-                <div><div class="counter" id="c-ready">8</div>PRONTI</div>
-                <div><div class="counter" id="c-recov">0</div>RIPARAZIONE</div>
-                <div><div class="counter" id="c-lost">0</div>PERSI</div>
-            </div>
-            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:5px; margin-top:10px;">
-                <button onclick="changeFleet('ready', -1)">Danneggia</button>
-                <button onclick="changeFleet('recov', -1)">Ripara</button>
-            </div>
-        </div>
-        <div class="card">
-            <h2>Victory Points (VP)</h2>
-            <div class="stat-line">
-                <label>VP Attuali:</label>
-                <input type="number" id="vp-track" value="0" style="width: 60px;">
-            </div>
-        </div>
-    </div>
-
 </div>
 
 <script>
-    function show(id) {
-        document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    let squadron = [];
+    
+    function openTab(id) {
+        document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
         document.getElementById(id).classList.add('active');
         event.currentTarget.classList.add('active');
+        if(id === 'combat') updateSelects();
     }
 
-    // --- SETUP: ASSEGNAZIONE SQUADRIGLIA (S1) ---
-    function rollSquadronAssignment() {
-        const d6 = Math.floor(Math.random() * 6) + 1;
-        const nation = document.getElementById('nation').value;
-        let plane = "";
-        let tier = "";
+    // --- SETUP ---
+    function rollS1() {
+        const d = Math.floor(Math.random()*6)+1;
+        const n = document.getElementById('nation').value;
+        let p = "";
+        if(d<=2) p = {GER:"Albatros D.III", UK:"Sopwith Pup", FR:"Nieuport 17", US:"Nieuport 17"}[n];
+        else if(d<=4) p = {GER:"Fokker Dr.I", UK:"Sopwith Camel", FR:"SPAD VII", US:"Nieuport 28"}[n];
+        else p = {GER:"Fokker D.VII", UK:"Sopwith Dolphin", FR:"SPAD XIII", US:"SPAD XIII"}[n];
+        document.getElementById('setup-res').innerHTML = `Tiro: ${d} | Squadriglia equipaggiata con: <b>${p}</b>`;
+    }
 
-        if (d6 <= 2) { // Tier 1
-            const p = { GER: "Albatros D.III", UK: "Sopwith Pup", FR: "Nieuport 17", US: "Nieuport 17" };
-            plane = p[nation];
-            tier = "Tier 1 (Gun 4/6, Perf 6, Struct 5)";
-        } else if (d6 <= 4) { // Tier 2
-            const p = { GER: "Fokker Dr.I", UK: "Sopwith Camel", FR: "SPAD VII", US: "Nieuport 28" };
-            plane = p[nation];
-            tier = "Tier 2 (Gun 4/6, Perf 7, Struct 5)";
-        } else { // Tier 3
-            const p = { GER: "Fokker D.VII", UK: "Sopwith Dolphin", FR: "SPAD XIII", US: "SPAD XIII" };
-            plane = p[nation];
-            tier = "Tier 3 (Gun 4/6, Perf 8, Struct 5)";
+    function rollS2() {
+        const d = Math.floor(Math.random()*6)+1;
+        const fields = ["Aeroporto A (Nord)", "Aeroporto A (Nord)", "Aeroporto B (Centro)", "Aeroporto B (Centro)", "Aeroporto C (Sud)", "Aeroporto C (Sud)"];
+        document.getElementById('setup-res').innerHTML += `<br>Base Operativa: <b>${fields[d-1]}</b>`;
+    }
+
+    function rollMeteo() {
+        const d = Math.floor(Math.random()*6)+1;
+        const m = ["Sereno", "Sereno", "Nuvole Leggere (-1 Photo)", "Nuvole Leggere (-1 Photo)", "Nuvole Pesanti (-2 Photo)", "Nuvole Pesanti (-2 Photo)"];
+        document.getElementById('meteo-res').innerText = `D6: ${d} - Risultato: ${m[d-1]}`;
+    }
+
+    // --- SQUADRON ---
+    function generateSquadron() {
+        squadron = [];
+        const names = ["Baracca", "Richthofen", "Fonck", "Mannock", "Bishop", "Udet", "Ball", "Rickenbacker"];
+        for(let i=0; i<8; i++) {
+            const d = Math.floor(Math.random()*6)+1;
+            let a=0, g=0;
+            if(d===1) {a=0; g=0;} else if(d<=3) {a=1; g=0;} else if(d<=5) {a=0; g=1;} else {a=1; g=1;}
+            squadron.push({ name: names[i], air: a, gnd: g, kills: 0, isAce: false });
         }
-        document.getElementById('res-s1').innerHTML = `Tiro: ${d6} <br>Modello: <b>${plane}</b><br><small>${tier}</small>`;
+        renderRoster();
     }
 
-    // --- SETUP: AEROPORTO BASE (S2) ---
-    function rollHomeField() {
-        const d6 = Math.floor(Math.random() * 6) + 1;
-        let field = "";
-        if (d6 <= 2) field = "Aeroporto A (Settore Nord)";
-        else if (d6 <= 4) field = "Aeroporto B (Settore Centrale)";
-        else field = "Aeroporto C (Settore Sud)";
-        document.getElementById('res-s2').innerHTML = `Tiro: ${d6} <br><b>${field}</b>`;
+    function renderRoster() {
+        const body = document.getElementById('pilot-list');
+        body.innerHTML = "";
+        squadron.forEach((p, i) => {
+            body.innerHTML += `
+                <tr>
+                    <td class="${p.isAce ? 'ace' : ''}">${p.isAce ? '★ ' : ''}${p.name}</td>
+                    <td>${p.air}</td>
+                    <td>${p.gnd}</td>
+                    <td>${p.kills}</td>
+                    <td><button onclick="addKill(${i})">+Kill</button></td>
+                </tr>`;
+        });
     }
 
-    // --- METEO (M1) ---
-    function rollWeather() {
-        const d6 = Math.floor(Math.random() * 6) + 1;
-        let res = "";
-        if (d6 <= 2) res = "Sereno: Nessun effetto.";
-        else if (d6 <= 4) res = "Nuvole Leggere: -1 Foto/Artiglieria, -1 Atterraggio Difficile.";
-        else res = "Nuvole Pesanti: -2 Foto/Artiglieria, -2 Atterraggio Difficile.";
-        document.getElementById('res-weather').innerHTML = `Tiro: ${d6} <br><b>${res}</b>`;
-    }
-
-    // --- INCONTRI (7.0) ---
-    function rollEncounter() {
-        const d6 = Math.floor(Math.random() * 6) + 1;
-        let res = "";
-        if (d6 === 1) res = "Problemi al Motore! (Controlla aereo danneggiato)";
-        else if (d6 <= 3) res = "Raid Nemico: Combatti contro D3+1 Caccia nemici!";
-        else if (d6 <= 5) res = "Pattuglia Caccia: Incontro con D6 velivoli nemici.";
-        else res = "Bersaglio di Terra: Avvistata Fanteria o Carri!";
-        document.getElementById('res-enc').innerHTML = `Tiro: ${d6} <br><b>${res}</b>`;
-    }
-
-    // --- LOGISTICA FLOTTA ---
-    function changeFleet(type, amt) {
-        let r = parseInt(document.getElementById('c-ready').innerText);
-        let rec = parseInt(document.getElementById('c-recov').innerText);
-        let l = parseInt(document.getElementById('c-lost').innerText);
-
-        if (type === 'ready' && r > 0) {
-            document.getElementById('c-ready').innerText = r - 1;
-            document.getElementById('c-recov').innerText = rec + 1;
-        } else if (type === 'recov' && rec > 0) {
-            document.getElementById('c-recov').innerText = rec - 1;
-            document.getElementById('c-ready').innerText = r + 1;
+    function addKill(i) {
+        squadron[i].kills++;
+        if(squadron[i].kills >= 5 && !squadron[i].isAce) {
+            squadron[i].isAce = true;
+            squadron[i].air += 1;
+            alert(squadron[i].name + " è ora un ASSO!");
         }
+        renderRoster();
+    }
+
+    function updateSelects() {
+        const s1 = document.getElementById('sel-air-pilot');
+        const s2 = document.getElementById('sel-gnd-pilot');
+        const opts = squadron.map((p, i) => `<option value="${i}">${p.name} (A:${p.air}/G:${p.gnd})</option>`).join('');
+        s1.innerHTML = s2.innerHTML = opts || "<option>Genera squadriglia!</option>";
+    }
+
+    // --- COMBAT ENGINE ---
+    function solveAir() {
+        const p = squadron[document.getElementById('sel-air-pilot').value];
+        const diff = parseInt(document.getElementById('air-in').value);
+        const struct = parseInt(document.getElementById('air-target').value);
+        
+        let dice = diff <= 2 ? 2 : diff <= 4 ? 3 : diff <= 7 ? 4 : 5;
+        let hits = 0, rolls = [];
+        
+        for(let i=0; i<dice; i++) {
+            let d = Math.floor(Math.random()*6)+1;
+            rolls.push(d);
+            if(d === 1) continue; 
+            if((d + p.air) >= 5) hits++;
+        }
+
+        let msg = hits >= struct ? "DISTRUTTO!" : hits >= (struct-2) ? "DANNEGGIATO!" : "EFFETTO MINORE";
+        displayCombat("ARIA-ARIA", p.name, rolls, hits, msg);
+    }
+
+    function solveGround() {
+        const p = squadron[document.getElementById('sel-gnd-pilot').value];
+        const diff = parseInt(document.getElementById('gnd-in').value);
+        const dice = diff <= 5 ? 1 : diff <= 10 ? 2 : 3;
+        
+        let hits = 0, rolls = [];
+        for(let i=0; i<dice; i++) {
+            let d = Math.floor(Math.random()*6)+1;
+            rolls.push(d);
+            if(d > 1 && (d + p.gnd) >= 5) hits++;
+        }
+        
+        let dmg = 0;
+        for(let i=0; i<hits; i++) { if(Math.floor(Math.random()*6)+1 >= 3) dmg++; }
+        
+        displayCombat("ARIA-TERRA", p.name, rolls, hits, `Danni inflitti: ${dmg}`);
+    }
+
+    function displayCombat(mode, name, rolls, hits, msg) {
+        const out = `[${mode}] <b>${name}</b> | Dadi: [${rolls.join(',')}] | Hits: ${hits} | <b>${msg}</b>`;
+        document.getElementById('combat-res').innerHTML = out;
+        document.getElementById('combat-log').innerHTML = `<div>${out}</div>` + document.getElementById('combat-log').innerHTML;
     }
 </script>
-
 </body>
 </html>
