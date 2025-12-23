@@ -3,149 +3,186 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aces of Valor - Mission Console</title>
+    <title>Aces of Valor - Campaign Command</title>
     <style>
-        :root { --army-green: #4b5320; --paper: #d2b48c; --ink: #1a1a1a; --danger: #8b0000; }
-        body { background-color: #2b2b2b; color: var(--paper); font-family: 'Courier New', Courier, monospace; margin: 0; padding: 10px; }
-        .container { max-width: 800px; margin: auto; border: 2px solid var(--army-green); padding: 15px; background: #333; box-shadow: 0 0 20px rgba(0,0,0,0.5); }
+        :root { --paper: #f0e6d2; --ink: #3b2f21; --military: #556b2f; --accent: #8b0000; }
+        body { background: #1a1a1a; color: var(--ink); font-family: 'Courier New', Courier, monospace; padding: 10px; }
+        .map-bg { max-width: 800px; margin: auto; background: var(--paper); border: 10px double var(--ink); padding: 20px; border-radius: 2px; position: relative; }
         
-        h2 { text-align: center; border-bottom: 2px solid var(--army-green); padding-bottom: 10px; color: var(--paper); text-transform: uppercase; }
-        
-        .nav { display: grid; grid-template-columns: repeat(2, 1fr); gap: 5px; margin-bottom: 20px; }
-        .nav-btn { background: var(--army-green); color: white; border: none; padding: 10px; cursor: pointer; font-weight: bold; font-size: 0.8em; }
-        .nav-btn.active { background: var(--paper); color: black; }
+        h1, h2 { text-align: center; text-transform: uppercase; letter-spacing: 2px; border-bottom: 2px solid var(--ink); }
+        .tab-nav { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; margin-bottom: 20px; }
+        .tab-btn { background: var(--military); color: white; border: none; padding: 10px; cursor: pointer; font-size: 0.8em; text-transform: uppercase; }
+        .tab-btn.active { background: var(--ink); }
 
-        .card { background: #444; padding: 15px; border-radius: 5px; margin-bottom: 15px; border: 1px solid #555; }
-        .die-button { background: var(--danger); color: white; border: none; padding: 15px; font-size: 1.2em; cursor: pointer; border-radius: 5px; width: 100%; margin-top: 10px; }
+        .section { display: none; }
+        .active { display: block; }
+
+        .card { border: 1px solid var(--ink); padding: 10px; margin-bottom: 10px; background: rgba(255,255,255,0.3); }
+        .stat-line { display: flex; justify-content: space-between; align-items: center; margin: 5px 0; }
+        input, select { background: transparent; border: 1px solid var(--ink); padding: 5px; font-family: inherit; }
         
-        .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
-        .result-area { margin-top: 15px; padding: 10px; background: rgba(0,0,0,0.3); border-left: 4px solid var(--paper); min-height: 50px; }
+        .dice-btn { background: var(--accent); color: white; border: none; padding: 10px; width: 100%; cursor: pointer; font-weight: bold; margin-top: 5px; }
+        .result-box { background: #fff; border-left: 5px solid var(--accent); padding: 8px; margin-top: 5px; font-weight: bold; min-height: 20px; }
         
-        input[type="number"] { width: 100%; padding: 8px; background: #222; color: var(--paper); border: 1px solid var(--army-green); }
-        .log { font-size: 0.8em; color: #aaa; max-height: 100px; overflow-y: auto; border-top: 1px solid #555; margin-top: 10px; padding-top: 5px; }
+        .fleet-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; text-align: center; }
+        .counter { font-size: 1.5em; font-weight: bold; }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <h2>Aces of Valor - Dashboard</h2>
-
-    <div class="nav">
-        <button class="nav-btn active" onclick="show('tab-setup')">1. SETUP & METEO</button>
-        <button class="nav-btn" onclick="show('tab-encounter')">2. AVVISTAMENTO</button>
-        <button class="nav-btn" onclick="show('tab-combat')">3. COMBATTIMENTO</button>
-        <button class="nav-btn" onclick="show('tab-damage')">4. DANNI & LOG</button>
+<div class="map-bg">
+    <h1>Aces of Valor - HQ</h1>
+    
+    <div class="tab-nav">
+        <button class="tab-btn active" onclick="show('setup')">Setup Squadriglia</button>
+        <button class="tab-btn" onclick="show('mission')">Missione</button>
+        <button class="tab-btn" onclick="show('fleet')">Logistica</button>
     </div>
 
-    <div id="tab-setup" class="tab-content">
+    <div id="setup" class="section active">
         <div class="card">
-            <h3>Meteo & Missione</h3>
-            <p>Tira 2d10 per determinare le condizioni atmosferiche (Tabella S-1).</p>
-            <button class="die-button" onclick="rollTable('meteo', 20)">LANCIA 2d10 METEO</button>
-            <div id="res-meteo" class="result-area">In attesa del comando...</div>
-        </div>
-    </div>
-
-    <div id="tab-encounter" class="tab-content" style="display:none;">
-        <div class="card">
-            <h3>Tabella Incontri (M-2)</h3>
-            <div class="stat-grid">
-                <div><label>Mod. Situazione</label><input type="number" id="mod-enc" value="0"></div>
-                <div><label>Vantaggio Pos.</label><input type="number" id="mod-pos" value="0"></div>
+            <h2>I) Campagna & Nazionalità</h2>
+            <div class="stat-line">
+                <label>Lunghezza:</label>
+                <select id="camp-len">
+                    <option value="8">Corta (8 Missioni)</option>
+                    <option value="12">Media (12 Missioni)</option>
+                    <option value="16">Lunga (16 Missioni)</option>
+                </select>
             </div>
-            <button class="die-button" onclick="rollTable('encounter', 10, 'mod-enc')">LANCIA 1d10 AVVISTAMENTO</button>
-            <div id="res-encounter" class="result-area">...</div>
-        </div>
-    </div>
-
-    <div id="tab-combat" class="tab-content" style="display:none;">
-        <div class="card">
-            <h3>Fuoco Aria-Aria (C-1)</h3>
-            <p>Calcola il tiro per colpire basato sulla distanza e abilità.</p>
-            <div class="stat-grid">
-                <div><label>Gunnery Skill</label><input type="number" id="mod-gun" value="1"></div>
-                <div><label>Distanza</label><input type="number" id="mod-dist" value="0"></div>
+            <div class="stat-line">
+                <label>Nazione:</label>
+                <select id="nation">
+                    <option value="GER">Germania (Luftstreitkräfte)</option>
+                    <option value="UK">Gran Bretagna (RFC/RAF)</option>
+                    <option value="FR">Francia (Aéronautique Militaire)</option>
+                    <option value="US">USA (Air Service)</option>
+                </select>
             </div>
-            <button class="die-button" onclick="rollTable('combat', 10, 'mod-gun')">LANCIA 1d10 ATTACCO</button>
-            <div id="res-combat" class="result-area">...</div>
+            <button class="dice-btn" onclick="rollSquadronAssignment()">Roll S1: Assegnazione Squadriglia (D6)</button>
+            <div id="res-s1" class="result-box">Aerei iniziali: -</div>
+        </div>
+
+        <div class="card">
+            <h2>II) Aeroporto Base (S2)</h2>
+            <button class="dice-btn" onclick="rollHomeField()">Roll S2: Posizione Aeroporto (D6)</button>
+            <div id="res-s2" class="result-box">Aeroporto di Casa: -</div>
         </div>
     </div>
 
-    <div id="tab-damage" class="tab-content" style="display:none;">
+    <div id="mission" class="section">
         <div class="card">
-            <h3>Tabella Danni Critici</h3>
-            <button class="die-button" onclick="rollTable('damage', 10)">LANCIA 1d10 DANNO</button>
-            <div id="res-damage" class="result-area">...</div>
+            <h2>Meteo & Turno</h2>
+            <button class="dice-btn" onclick="rollWeather()">Tira Meteo (D6)</button>
+            <div id="res-weather" class="result-box">-</div>
         </div>
         <div class="card">
-            <h3>Log di Volo</h3>
-            <div id="flight-log" class="log">Inizio missione registrato.</div>
+            <h2>Evento Incontro (M2/M3)</h2>
+            <button class="dice-btn" onclick="rollEncounter()">Genera Incontro</button>
+            <div id="res-enc" class="result-box">-</div>
+        </div>
+    </div>
+
+    <div id="fleet" class="section">
+        <div class="card">
+            <h2>Stato Squadriglia</h2>
+            <p>Aerei totali iniziali: 8 Fighters</p>
+            <div class="fleet-grid">
+                <div><div class="counter" id="c-ready">8</div>PRONTI</div>
+                <div><div class="counter" id="c-recov">0</div>RIPARAZIONE</div>
+                <div><div class="counter" id="c-lost">0</div>PERSI</div>
+            </div>
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:5px; margin-top:10px;">
+                <button onclick="changeFleet('ready', -1)">Danneggia</button>
+                <button onclick="changeFleet('recov', -1)">Ripara</button>
+            </div>
+        </div>
+        <div class="card">
+            <h2>Victory Points (VP)</h2>
+            <div class="stat-line">
+                <label>VP Attuali:</label>
+                <input type="number" id="vp-track" value="0" style="width: 60px;">
+            </div>
         </div>
     </div>
 
 </div>
 
 <script>
-    const tables = {
-        meteo: {
-            2: "Cielo Limpido: Nessun modificatore.",
-            15: "Nuvole Sparse: -1 ai tiri di avvistamento.",
-            18: "Forte Nuvolosità: -2 Attacco al suolo.",
-            20: "Tempesta: Missione Abortita / Atterraggio d'emergenza."
-        },
-        encounter: {
-            1: "Nessun nemico avvistato. Prosegui navigazione.",
-            5: "Contatto Radar/Visivo: 1 Elemento Nemico (distanza lunga).",
-            8: "Ingaggio Immediato: Il nemico ha il vantaggio della quota!",
-            10: "Asso Nemico: Sei stato colto di sorpresa!"
-        },
-        combat: {
-            1: "Mancato: Le raffiche passano lontano.",
-            6: "Colpito! Danno leggero all'ala nemica.",
-            9: "Colpito Duramente! Il nemico perde quota.",
-            11: "Esplosione in volo: Bersaglio distrutto!"
-        },
-        damage: {
-            1: "Danno Superficiale: Solo estetica.",
-            5: "Perdita Olio: -1 a tutti i tiri futuri.",
-            8: "Motore Colpito: Velocità dimezzata.",
-            10: "Incendio: Tenta il lancio col paracadute!"
-        }
-    };
-
     function show(id) {
-        document.querySelectorAll('.tab-content').forEach(t => t.style.display = 'none');
-        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-        document.getElementById(id).style.display = 'block';
+        document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
         event.currentTarget.classList.add('active');
     }
 
-    function rollTable(tableName, dice, modId = null) {
-        let roll = Math.floor(Math.random() * dice) + 1;
-        if(dice === 20 && tableName === 'meteo') { // Simulazione 2d10
-            roll = (Math.floor(Math.random() * 10) + 1) + (Math.floor(Math.random() * 10) + 1);
-        }
-        
-        let mod = modId ? parseInt(document.getElementById(modId).value) : 0;
-        let total = roll + mod;
-        
-        let table = tables[tableName];
-        let result = "Risultato Ignoto";
-        let keys = Object.keys(table).map(Number).sort((a,b) => b-a);
-        
-        for(let k of keys) {
-            if(total >= k) {
-                result = table[k];
-                break;
-            }
-        }
+    // --- SETUP: ASSEGNAZIONE SQUADRIGLIA (S1) ---
+    function rollSquadronAssignment() {
+        const d6 = Math.floor(Math.random() * 6) + 1;
+        const nation = document.getElementById('nation').value;
+        let plane = "";
+        let tier = "";
 
-        const output = `TIRO: ${roll} ${mod !== 0 ? '+ Mod ('+mod+')' : ''} = <strong>${total}</strong><br>ESITO: ${result}`;
-        document.getElementById('res-' + tableName).innerHTML = output;
-        
-        // Aggiungi al log
-        const log = document.getElementById('flight-log');
-        log.innerHTML = `[${tableName.toUpperCase()}] Risultato ${total}<br>` + log.innerHTML;
+        if (d6 <= 2) { // Tier 1
+            const p = { GER: "Albatros D.III", UK: "Sopwith Pup", FR: "Nieuport 17", US: "Nieuport 17" };
+            plane = p[nation];
+            tier = "Tier 1 (Gun 4/6, Perf 6, Struct 5)";
+        } else if (d6 <= 4) { // Tier 2
+            const p = { GER: "Fokker Dr.I", UK: "Sopwith Camel", FR: "SPAD VII", US: "Nieuport 28" };
+            plane = p[nation];
+            tier = "Tier 2 (Gun 4/6, Perf 7, Struct 5)";
+        } else { // Tier 3
+            const p = { GER: "Fokker D.VII", UK: "Sopwith Dolphin", FR: "SPAD XIII", US: "SPAD XIII" };
+            plane = p[nation];
+            tier = "Tier 3 (Gun 4/6, Perf 8, Struct 5)";
+        }
+        document.getElementById('res-s1').innerHTML = `Tiro: ${d6} <br>Modello: <b>${plane}</b><br><small>${tier}</small>`;
+    }
+
+    // --- SETUP: AEROPORTO BASE (S2) ---
+    function rollHomeField() {
+        const d6 = Math.floor(Math.random() * 6) + 1;
+        let field = "";
+        if (d6 <= 2) field = "Aeroporto A (Settore Nord)";
+        else if (d6 <= 4) field = "Aeroporto B (Settore Centrale)";
+        else field = "Aeroporto C (Settore Sud)";
+        document.getElementById('res-s2').innerHTML = `Tiro: ${d6} <br><b>${field}</b>`;
+    }
+
+    // --- METEO (M1) ---
+    function rollWeather() {
+        const d6 = Math.floor(Math.random() * 6) + 1;
+        let res = "";
+        if (d6 <= 2) res = "Sereno: Nessun effetto.";
+        else if (d6 <= 4) res = "Nuvole Leggere: -1 Foto/Artiglieria, -1 Atterraggio Difficile.";
+        else res = "Nuvole Pesanti: -2 Foto/Artiglieria, -2 Atterraggio Difficile.";
+        document.getElementById('res-weather').innerHTML = `Tiro: ${d6} <br><b>${res}</b>`;
+    }
+
+    // --- INCONTRI (7.0) ---
+    function rollEncounter() {
+        const d6 = Math.floor(Math.random() * 6) + 1;
+        let res = "";
+        if (d6 === 1) res = "Problemi al Motore! (Controlla aereo danneggiato)";
+        else if (d6 <= 3) res = "Raid Nemico: Combatti contro D3+1 Caccia nemici!";
+        else if (d6 <= 5) res = "Pattuglia Caccia: Incontro con D6 velivoli nemici.";
+        else res = "Bersaglio di Terra: Avvistata Fanteria o Carri!";
+        document.getElementById('res-enc').innerHTML = `Tiro: ${d6} <br><b>${res}</b>`;
+    }
+
+    // --- LOGISTICA FLOTTA ---
+    function changeFleet(type, amt) {
+        let r = parseInt(document.getElementById('c-ready').innerText);
+        let rec = parseInt(document.getElementById('c-recov').innerText);
+        let l = parseInt(document.getElementById('c-lost').innerText);
+
+        if (type === 'ready' && r > 0) {
+            document.getElementById('c-ready').innerText = r - 1;
+            document.getElementById('c-recov').innerText = rec + 1;
+        } else if (type === 'recov' && rec > 0) {
+            document.getElementById('c-recov').innerText = rec - 1;
+            document.getElementById('c-ready').innerText = r + 1;
+        }
     }
 </script>
 
