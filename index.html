@@ -3,147 +3,123 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aces of Valor - Dashboard</title>
+    <title>Aces of Valor - Tactical Dashboard</title>
     <style>
-        :root {
-            --gold: #d4af37;
-            --dark-blue: #1c2833;
-            --paper: #f4ecd8;
-            --accent: #e67e22;
-        }
-        body { 
-            font-family: 'Courier New', Courier, monospace; 
-            background-color: var(--dark-blue); 
-            color: #ecf0f1; 
-            margin: 0; padding: 15px;
-        }
-        .container { max-width: 600px; margin: auto; }
-        
-        /* Stile Vintage Card */
-        .phase { 
-            display: none; 
-            background: rgba(44, 62, 80, 0.9); 
-            padding: 20px; 
-            border-radius: 5px; 
-            border: 2px solid var(--gold);
-            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
-        }
-        .active { display: block; animation: fadeIn 0.5s; }
-        
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-
-        h1 { color: var(--gold); text-align: center; border-bottom: 2px double var(--gold); padding-bottom: 10px; }
-        h2 { font-size: 1.2rem; color: var(--gold); text-transform: uppercase; margin-top: 0; }
-
-        /* Input e Button */
-        select, input { 
-            width: 100%; padding: 12px; margin: 10px 0; 
-            background: var(--paper); color: #333; 
-            border: none; border-radius: 3px; font-weight: bold;
-        }
-        button { 
-            background: var(--accent); color: white; border: none; 
-            padding: 15px; border-radius: 3px; cursor: pointer; 
-            font-weight: bold; width: 100%; text-transform: uppercase;
-            box-shadow: 0 3px 0 #a04000; transition: 0.2s;
-        }
-        button:active { transform: translateY(3px); box-shadow: none; }
-        
-        .btn-nav { background: #27ae60; box-shadow: 0 3px 0 #196f3d; margin-top: 20px; }
-
-        /* Risultati */
-        .result-box { 
-            background: rgba(244, 236, 216, 0.1); 
-            padding: 15px; margin-top: 15px; 
-            border-left: 5px solid var(--gold); font-size: 1rem;
-        }
-        
-        .pilot-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
-        .pilot-card { background: rgba(0,0,0,0.2); padding: 5px 10px; border: 1px solid #555; }
-
-        table { width: 100%; margin-top: 15px; border-collapse: collapse; background: #f4ecd8; color: #333; }
-        th, td { border: 1px solid #333; padding: 8px; text-align: center; }
-        th { background: #d5dbdb; }
-
-        .status-bar { text-align: center; margin-bottom: 10px; color: var(--gold); font-weight: bold; }
+        :root { --bg: #1a1a1a; --card: #2d2d2d; --accent: #d4af37; --text: #e0e0e0; }
+        body { font-family: 'Courier New', Courier, monospace; background: var(--bg); color: var(--text); margin: 0; padding: 10px; }
+        .header { text-align: center; border-bottom: 2px solid var(--accent); margin-bottom: 20px; padding-bottom: 10px; }
+        .tab-container { display: flex; overflow-x: auto; gap: 5px; margin-bottom: 20px; padding-bottom: 5px; }
+        .tab { background: var(--card); border: 1px solid var(--accent); color: white; padding: 10px; cursor: pointer; white-space: nowrap; border-radius: 4px; }
+        .tab.active { background: var(--accent); color: black; font-weight: bold; }
+        .section { display: none; background: var(--card); padding: 15px; border-radius: 8px; border-left: 5px solid var(--accent); }
+        .section.active { display: block; }
+        .dice-row { display: flex; gap: 10px; align-items: center; margin-bottom: 15px; background: rgba(0,0,0,0.2); padding: 10px; border-radius: 5px; }
+        .roll-btn { background: #b22222; color: white; border: none; padding: 12px; border-radius: 5px; cursor: pointer; flex-grow: 1; font-weight: bold; }
+        .result-display { font-size: 1.5rem; color: var(--accent); font-weight: bold; min-width: 40px; text-align: center; }
+        .table-output { margin-top: 15px; line-height: 1.4; border-top: 1px dashed #555; padding-top: 10px; color: #fff; }
+        .modifier-input { width: 50px; padding: 5px; background: #444; color: white; border: 1px solid var(--accent); border-radius: 3px; }
+        label { font-size: 0.8rem; text-transform: uppercase; }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <h1>🛩️ ACES OF VALOR</h1>
+<div class="header">
+    <h1>ACES OF VALOR</h1>
+    <small>Flight Manual Assistant</small>
+</div>
 
-    <div id="phase1" class="phase active">
-        <div class="status-bar">LOGBOOK - FASE 1</div>
-        <h2>Configura Campagna</h2>
-        <label>Durata Operazione:</label>
-        <select id="campLength">
-            <option value="8">CORTA (8 Missioni) - Obiettivo 21 VP</option>
-            <option value="12">MEDIA (12 Missioni) - Obiettivo 29 VP</option>
-            <option value="16">LUNGA (16 Missioni) - Obiettivo 36 VP</option>
-        </select>
-        <button class="btn-nav" onclick="cambiaFase(2)">Pianifica Squadriglia ➔</button>
+<div class="tab-container">
+    <div class="tab active" onclick="showSection('mission')">MISSIONE</div>
+    <div class="tab" onclick="showSection('air-air')">AIR-TO-AIR</div>
+    <div class="tab" onclick="showSection('combat')">COMBAT</div>
+    <div class="tab" onclick="showSection('ground')">GROUND</div>
+</div>
+
+<div id="mission" class="section active">
+    <h3>Generazione Missione (M-1)</h3>
+    <div class="dice-row">
+        <label>Mod:</label>
+        <input type="number" id="mod-m1" class="modifier-input" value="0">
+        <button class="roll-btn" onclick="handleRoll('m1', 10, 'mod-m1')">ROLL D10</button>
+        <div id="res-m1" class="result-display">?</div>
     </div>
+    <div id="out-m1" class="table-output">Lancia per determinare il tipo di missione...</div>
+</div>
 
-    <div id="phase2" class="phase">
-        <div class="status-bar">LOGBOOK - FASE 2</div>
-        <h2>Assegnazione Velivoli</h2>
-        <select id="nat">
-            <option value="GER">🇩🇪 GERMANIA</option>
-            <option value="UK">🇬🇧 REGNO UNITO</option>
-            <option value="FR">🇫🇷 FRANCIA</option>
-            <option value="US">🇺🇸 U.S.A.</option>
-        </select>
-        <button onclick="calcolaTier()">🎲 Tira Dado Tier</button>
-        <div id="tierRes" class="result-box" style="display:none;"></div>
-        <button class="btn-nav" onclick="cambiaFase(3)">Recluta Piloti ➔</button>
+<div id="air-air" class="section">
+    <h3>Avvistamento (A-1)</h3>
+    <div class="dice-row">
+        <label>Mod:</label>
+        <input type="number" id="mod-a1" class="modifier-input" value="0">
+        <button class="roll-btn" onclick="handleRoll('a1', 10, 'mod-a1')">ROLL D10</button>
+        <div id="res-a1" class="result-display">?</div>
     </div>
+    <div id="out-a1" class="table-output">Lancia per vedere chi avvista chi...</div>
+</div>
 
-    <div id="phase3" class="phase">
-        <div class="status-bar">LOGBOOK - FASE 3</div>
-        <h2>Stato Piloti (Ready Box)</h2>
-        <button onclick="calcolaPiloti()">📋 Genera Squadriglia</button>
-        <div id="pilotRes" class="pilot-grid" style="display:none;"></div>
-        <button class="btn-nav" onclick="cambiaFase(4)">Localizza Base ➔</button>
+<div id="combat" class="section">
+    <h3>Tiro per Colpire (C-1)</h3>
+    <div class="dice-row">
+        <label>Mod:</label>
+        <input type="number" id="mod-c1" class="modifier-input" value="0">
+        <button class="roll-btn" onclick="handleRoll('c1', 10, 'mod-c1')">ROLL D10</button>
+        <div id="res-c1" class="result-display">?</div>
     </div>
-
-    <div id="phase4" class="phase">
-        <div class="status-bar">LOGBOOK - FASE 4</div>
-        <h2>Coordinate Aeroporto</h2>
-        <button onclick="calcolaAeroporto()">📍 Rileva Posizione</button>
-        <div id="airfieldRes" class="result-box" style="display:none; text-align:center; font-size:1.5rem;"></div>
-        <button class="btn-nav" onclick="cambiaFase(5)">Inizia Missioni ➔</button>
-    </div>
-
-    <div id="phase5" class="phase">
-        <div class="status-bar">TABELLONE DI GUERRA</div>
-        <h2>Registro Voli</h2>
-        <input type="text" id="mType" placeholder="Tipo Missione (es. Patrol)">
-        <input type="number" id="mPoints" placeholder="Punti Missione (MP)">
-        <button style="background:#27ae60" onclick="aggiungiMissione()">Registra Risultato</button>
-
-        <table id="missionLog">
-            <thead><tr><th>M.</th><th>Tipo</th><th>MP</th><th>VP</th></tr></thead>
-            <tbody></tbody>
-        </table>
-        
-        <div class="result-box" id="totalStatus" style="text-align:center;">
-            <b>VP TOTALI: 0</b>
-        </div>
-        <button onclick="location.reload()" style="background:#c0392b; font-size:0.8rem; margin-top:40px;">⚠️ Resetta Campagna</button>
-    </div>
+    <div id="out-c1" class="table-output">Determina se il colpo va a segno...</div>
 </div>
 
 <script>
-    function cambiaFase(num) {
-        const fasi = document.getElementsByClassName('phase');
-        for (let i = 0; i < fasi.length; i++) fasi[i].style.display = 'none';
-        document.getElementById('phase' + num).classList.add('active');
-        window.scrollTo(0,0);
+    const data = {
+        m1: {
+            1: "Patrol (Target: Zone 1)",
+            3: "Close Air Support (Target: Frontline)",
+            6: "Tactical Bombing (Target: Installation)",
+            9: "Escort Mission (Protect Bombers)",
+            10: "Special Ops / Recon"
+        },
+        a1: {
+            1: "Automatic Tailing (Vantaggio Totale)",
+            3: "Vantaggio: Tu inizi l'attacco",
+            6: "Incontro Frontale: Entrambi sparano",
+            8: "Svantaggio: Il nemico ti insegue",
+            10: "Imboscata Nemica!"
+        },
+        c1: {
+            1: "Mancato (Out of Range/Jam)",
+            5: "Colpo di Striscio (1 Danno)",
+            8: "Colpo Diretto (2 Danni)",
+            10: "Colpo Critico! (Tira su tabella Danni)"
+        }
+    };
+
+    function showSection(id) {
+        document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+        event.currentTarget.classList.add('active');
     }
 
-    function calcolaTier() {
-        const n = document.getElementById('nat').value;
-        const d = Math.floor(Math.random() * 6) + 1;
-        const t = d <= 2 ? 1 : (d <= 4 ? 2 : 3);
-        const planes = {
+    function handleRoll(tableKey, dice, modId) {
+        const mod = parseInt(document.getElementById(modId).value) || 0;
+        const roll = Math.floor(Math.random() * dice) + 1;
+        const total = roll + mod;
+        
+        document.getElementById('res-' + tableKey).innerText = total;
+        
+        // Trova il risultato corrispondente nella tabella (approssimazione per difetto)
+        let table = data[tableKey];
+        let keys = Object.keys(table).map(Number).sort((a,b) => b-a);
+        let resultText = "Risultato fuori tabella";
+        
+        for(let k of keys) {
+            if(total >= k) {
+                resultText = table[k];
+                break;
+            }
+        }
+        document.getElementById('out-' + tableKey).innerHTML = `<strong>TOTALE ${total}:</strong> ${resultText}`;
+    }
+</script>
+
+</body>
+</html>
